@@ -20,9 +20,9 @@ def print_time(threadName, delay):
       app.macstatus.set("%s: %s :Counter %s" % (threadName, time.ctime(time.time()),str(count)))
       print "%s: %s" % (threadName, time.ctime(time.time()))
       if(GPIO.input(23) ==1):
-        print(“Button 1 pressed”)
+        print("Button 1 pressed")
       if(GPIO.input(24) == 0):
-        print(“Button 2 pressed”)
+        print("Button 2 pressed")
         GPIO.cleanup()
 
 # Run Thread 
