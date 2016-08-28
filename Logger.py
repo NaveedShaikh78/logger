@@ -36,7 +36,7 @@ def watch_GPIO(threadName, delay):
 
 # Run Thread 
 try:
-    thread.start_new_thread(watch_GPIO, ("watch_GPIO", 2))
+    thread.start_new_thread(watch_GPIO,("watch_GPIO", 2))
    
 except:
    print "Error:Logger encountered with some errror."
