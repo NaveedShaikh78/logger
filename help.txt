@@ -1,1 +1,11 @@
-Naveed
+Get Latest
+git pull orgin master
+
+commit
+git commit -am "Comment"
+
+push to branch
+git push origin master
+
+revert changes git
+git reset --hard
