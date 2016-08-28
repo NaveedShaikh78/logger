@@ -9,3 +9,16 @@ git push origin master
 
 revert changes git
 git reset --hard
+table 
+
+install sql
+sudo apt-get install sqlite3 
+
+to create database
+$ sqlite3 loggerdb.db 
+
+to create table
+BEGIN;
+CREATE TABLE logdata(srno integer primary key autoincrement,logdate DATE, logtime TIME, ioport integer,value integer,logtype integer);
+insert into logdata(logdate DATE, logtime TIME, ioport integer,value integer,logtype integer) values ();
+COMMIT; 

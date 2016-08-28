@@ -1,33 +1,42 @@
 import thread
 import time
+import datetime
 from Tkinter import *
 import ttk
 import RPi.GPIO as GPIO
- 
+import sqlite3
+conn = sqlite3.connect('example.db')
+GPI=[23,24];
+sqlx = conn.cursor()
+
 appview = __import__('AppMainView')
 app = appview.AppMainView()
 
-
 # Define a function for the thread
-def print_time(threadName, delay):
+def watch_GPIO(threadName, delay):
    count = 0
    GPIO.setmode(GPIO.BCM)
-   GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-   GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP)
-   while count < 15: 
+   for input in GPI:
+        GPIO.setup(input, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+        #GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+   
+   while True: 
       time.sleep(delay)
       count += 1
       app.macstatus.set("%s: %s :Counter %s" % (threadName, time.ctime(time.time()),str(count)))
-      print "%s: %s" % (threadName, time.ctime(time.time()))
-      if(GPIO.input(23) ==1):
-        print("Button 1 pressed")
-      if(GPIO.input(24) == 0):
-        print("Button 2 pressed")
-        GPIO.cleanup()
+      #print "%s: %s" % (threadName, time.ctime(time.time()))
+      for input in GPI:
+         now=datetime.date.today()
+         if(GPIO.input(input) ==0):
+             print "gpi:%s is on" % input
+
+             sqlx.execute("insert into logdata(logdate,logtime,ioport ,logvalue,logtype) values ('%s,%s,%s,%s,%s')"% 
+                          now.strftime("M/d/y"),now.strftime("H:M:S"),input,1)
+            #GPIO.cleanup()
 
 # Run Thread 
 try:
-   thread.start_new_thread(print_time, ("Thread-1", 2,))
+   thread.start_new_thread(watch_GPIO, ("watch_GPIO", 2))
    
 except:
    print "Error:Logger encountered with some errror."

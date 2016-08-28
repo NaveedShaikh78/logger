@@ -25,28 +25,13 @@
     <Compile Include="App.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="garbage\AutoPopUPView.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="AppMainView.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="garbage\autoComplete.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AutoComplete.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="garbage\logger1.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Logger.py" />
-    <Compile Include="garbage\PopUpAutoComplete.py">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="garbage\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
