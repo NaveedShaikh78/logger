@@ -2,7 +2,7 @@ import thread
 import time
 from Tkinter import *
 import ttk
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import sqlite3
 GPI=[23,24];
 
