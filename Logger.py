@@ -29,8 +29,8 @@ def watch_GPIO(threadName, delay):
          now=datetime.date.today()
          if(GPIO.input(input) ==0):
              print "gpi:%s is on" % input
-             sqlx.execute("insert into logdata(logdate,logtime,ioport ,logvalue,logtype) values ('%s,%s,%s,%s,%s')"% 
-                          (now.strftime("M/d/y"),now.strftime("H:M:S"),input,1,1))
+             sqlx.execute("insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s,%s,%s,%s')"% 
+                          (now.strftime("M/d/y H:M:S"),input,1,1))
              conn.commit()
             #GPIO.cleanup()
 
@@ -39,5 +39,5 @@ try:
    thread.start_new_thread(watch_GPIO, ("watch_GPIO", 2))
    
 except:
-   print "Error:Logger encountered with some errror."
+   print "Error:Logger encountered with some errror.",now.strftime("H:M:S")
 appview.root.mainloop()
