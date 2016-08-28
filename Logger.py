@@ -31,7 +31,7 @@ def watch_GPIO(threadName, delay):
              print "gpi:%s is on" % input
 
              sqlx.execute("insert into logdata(logdate,logtime,ioport ,logvalue,logtype) values ('%s,%s,%s,%s,%s')"% 
-                          now.strftime("M/d/y"),now.strftime("H:M:S"),input,1,1)
+                          (now.strftime("M/d/y"),now.strftime("H:M:S"),input,1,1))
             #GPIO.cleanup()
 
 # Run Thread 
