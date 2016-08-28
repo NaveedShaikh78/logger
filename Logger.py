@@ -1,9 +1,8 @@
 import thread
 import time
-import datetime
 from Tkinter import *
 import ttk
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import sqlite3
 GPI=[23,24];
 
@@ -29,7 +28,7 @@ def watch_GPIO(threadName, delay):
          now=datetime.date.today()
          if(GPIO.input(input) ==0):
              print "gpi:%s is on" % input
-             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y H:M:S'),input,1,1)
+             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),input,1,1)
              print query
              sqlx.execute(query)
              conn.commit()
@@ -37,8 +36,8 @@ def watch_GPIO(threadName, delay):
 
 # Run Thread 
 try:
-   thread.start_new_thread(watch_GPIO, ("watch_GPIO", 2))
+    thread.start_new_thread(watch_GPIO, ("watch_GPIO", 2))
    
 except:
-   print "Error:Logger encountered with some errror.",now.strftime("H:M:S")
+   print "Error:Logger encountered with some errror."
 appview.root.mainloop()
