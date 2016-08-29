@@ -14,6 +14,8 @@ def watch_GPIO(threadName, delay):
    conn = sqlite3.connect('loggerdb.db')
    sqlx = conn.cursor()
    count = 0
+   for input in GPI:
+        isOn[input]=False
    GPIO.setmode(GPIO.BCM)
    for input in GPI:
         GPIO.setup(input, GPIO.IN, pull_up_down = GPIO.PUD_UP)
@@ -25,9 +27,15 @@ def watch_GPIO(threadName, delay):
       app.macstatus.set("%s: %s :Counter %s" % (threadName, time.ctime(time.time()),str(count)))
       #print "%s: %s" % (threadName, time.ctime(time.time()))
       for input in GPI:
-         if(GPIO.input(input) ==0):
+         if(isOn[input] ==False and GPIO.input(input) ==0):
              print "gpi:%s is on" % input
              query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),input,1,1)
+             print query
+             sqlx.execute(query)
+             conn.commit()
+         if(isOn[input] ==True and GPIO.input(input) !=0):
+             print "gpi:%s is off" % input
+             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),input,1,0)
              print query
              sqlx.execute(query)
              conn.commit()
