@@ -4,48 +4,40 @@ from Tkinter import *
 import ttk
 import RPi.GPIO as GPIO
 import sqlite3
-GPI=[23,24];
-isOn={23:False,24:False}
+#{portno: port state} configure io ports can add new
+GPI={4:0,5:0,6:0,13:0,17:0,18:0,19:0,22:0,23:0,24:0,25:0,26:0}
 
 appview = __import__('AppMainView')
-app = appview.AppMainView()
-
-# Define a function for the thread
+app = appview.AppMainView()       #GPIO.cleanup()
 def watch_GPIO(threadName, delay):
    conn = sqlite3.connect('loggerdb.db')
    sqlx = conn.cursor()
    count = 0
    GPIO.setmode(GPIO.BCM)
-   for input in GPI:
-        GPIO.setup(input, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+   for ioport in GPI:
+        GPIO.setup(ioport, GPIO.IN, pull_up_down = GPIO.PUD_UP)
         #GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-   
    while True: 
       time.sleep(delay)
       count += 1
       app.macstatus.set("%s: %s :Counter %s" % (threadName, time.ctime(time.time()),str(count)))
-      #print "%s: %s" % (threadName, time.ctime(time.time()))
-      for input in GPI:
-         if(isOn[input] ==False and GPIO.input(input) ==0):
-             isOn[input] =True
-             print "gpi:%s is on" % input
-             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),input,1,1)
+      for ioport,iostate in GPI:
+         if(iostate==0 and GPIO.input(ioport) ==0):
+             iostate =1
+             print "gpi:%s is on" % ioport
+             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),ioport,1,1)
              print query
              sqlx.execute(query)
              conn.commit()
-         if(isOn[input] ==True and GPIO.input(input) !=0):
-             isOn[input] =False
-             print "gpi:%s is off" % input
-             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),input,1,0)
+         if(iostate==0 and GPIO.input(ioport) !=0):
+             iostate =1
+             print "gpi:%s is off" % ioport
+             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),ioport,1,0)
              print query
              sqlx.execute(query)
              conn.commit()
-            #GPIO.cleanup()
-
-# Run Thread 
 try:
     thread.start_new_thread(watch_GPIO,("watch_GPIO", 2))
-   
 except:
    print "Error:Logger encountered with some errror."
 appview.root.mainloop()
