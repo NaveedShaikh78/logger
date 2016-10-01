@@ -31,7 +31,13 @@
     <Compile Include="AutoComplete.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ClinetTestCode.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Logger.py" />
+    <Compile Include="TCPSocket.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

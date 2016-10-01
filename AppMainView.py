@@ -44,7 +44,7 @@ class AppMainView:
     self.lboperation=Label(frame,  anchor=W, bg=rowcolor0 , padx = 5, width=12, textvariable=self.operation);
     self.lboperation.grid(row=3,column=2,sticky=W+E+N+S);
     self.lboperation.bind("<Button-1>",self.labelClicked );
-    lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, text="Idele Reason")      .grid(row=4,column=0,sticky=W+E+N+S)
+    lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, text="Idle Reason")      .grid(row=4,column=0,sticky=W+E+N+S)
     lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 0, width=01, text=":")                 .grid(row=4,column=1,sticky=W+E+N+S)
     self.lbidlereson=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, textvariable=self.idlereson);
     self.lbidlereson.grid(row=4,column=2,sticky=W+E+N+S);
