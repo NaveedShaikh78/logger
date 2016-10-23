@@ -30,14 +30,14 @@ def watch_GPIO(threadName, delay):
              GPI[ioport] =True;
            
              print "gpi:%s is on" % ioport
-             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),ioport,1,1)
+             query="insert into machinelogs(starttime,ioport ,value,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),ioport,1,1)
              print query
              sqlx.execute(query)
              conn.commit()
          if(GPI[ioport]==True and GPIO.input(ioport) !=0):
              GPI[ioport] =False
              print "gpi:%s is off" % ioport
-             query="insert into logdata(logdatetime,ioport ,logvalue,logtype) values ('%s',%d,%d,%d)"% (time.strftime('%m/%d/%Y %X'),ioport,1,0)
+             query="update  machinelogs set endtime= '%s' where ioport=%d and endtime is null and srno=(select max(srno) from machinelogs where ioport=%d)"% (time.strftime('%m/%d/%Y %X'),ioport,ioport)
              print query
              sqlx.execute(query)
              conn.commit()
