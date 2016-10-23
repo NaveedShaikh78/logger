@@ -1,10 +1,12 @@
 import thread
+import os
 import time
 from Tkinter import *
 import ttk
 import App
-#import AutoPopUPView
 import AutoComplete
+import serial
+import RS232
 
 autocmp = __import__('AutoComplete')
 root = Tk()
@@ -17,7 +19,13 @@ class AppMainView:
     self.operation = StringVar()
     self.jobno = StringVar()
     self.idlereson = StringVar()
+    self.program = StringVar()
     self.sclr = StringVar()
+    self.sendtext = StringVar()
+    self.currentline = StringVar()
+    self.sendtext.set('Program  >>>')
+    self.currentline.set('............')
+    self.mediaPath=""
     frame = Frame(root)
     self.frame=frame
     frame.columnconfigure(0, weight=1)
@@ -45,25 +53,48 @@ class AppMainView:
     self.lboperation.grid(row=3,column=2,sticky=W+E+N+S);
     self.lboperation.bind("<Button-1>",self.labelClicked );
     lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, text="Idle Reason")      .grid(row=4,column=0,sticky=W+E+N+S)
-    lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 0, width=01, text=":")                 .grid(row=4,column=1,sticky=W+E+N+S)
+    lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 0, width=01, text=":")                .grid(row=4,column=1,sticky=W+E+N+S)
     self.lbidlereson=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, textvariable=self.idlereson);
     self.lbidlereson.grid(row=4,column=2,sticky=W+E+N+S);
     self.lbidlereson.bind("<Button-1>",self.labelClicked );
-    OperatorList = ('apple', 'banana', 'CranBerry', 'dogwood', 'alpha', 'Acorn','Accorn', 'Anise' )
-
+    self.bSend=Button(frame,  anchor=W, bg=rowcolor0 , padx = 0, width=01, textvariable=self.sendtext)
+    self.bSend.grid(row=5,column=0,sticky=W+E+N+S)
+    self.bSend.bind("<Button-1>",self.bSendClicked )
+    lb=Label(frame,  anchor=W, bg=rowcolor0 , padx = 0, width=01, text=":")                .grid(row=5,column=1,sticky=W+E+N+S)
+    self.lbprogram=Label(frame,  anchor=W, bg=rowcolor0 , padx = 5, width=12, textvariable=self.program);
+    self.lbprogram.grid(row=5,column=2,sticky=W+E+N+S)
+    self.lbprogram.bind("<Button-1>",self.labelClicked )
+    lb=Label(frame,  anchor=W, bg=rowcolor1 , padx = 5, width=12, textvariable=self.currentline).grid(row=6,column=0,columnspan=3,sticky=W+E+N+S)
+    
+  def bSendClicked (self, event) :
+      if RS232.portbz == False :
+         self.sendtext.set('Abort ....')
+         RS232.sendFile(self.mediaPath+self.program.get(),self.currentline,self.sendtext);
+      else :
+         self.sendtext.set('Program  >>>')
+         RS232.abort()         
   def labelClicked(self, event):
+      popUpList=[];
       self.strvar=StringVar()
-      if self.lboperator==event.widget  :  strvar=self.operator
-      if self.lbjobno==event.widget     :  strvar=self.jobno
-      if self.lboperation==event.widget :  strvar=self.operation
-      if self.lbidlereson==event.widget :  strvar=self.idlereson
-      OperatorList = ('apple', 'banana', 'CranBerry', 'dogwood', 'alpha', 'Acorn','Accorn', 'Anise' )
+      if self.lboperator==event.widget  :
+         strvar=self.operator
+      if self.lbjobno==event.widget  :
+         strvar=self.jobno
+      if self.lboperation==event.widget :
+         strvar=self.operation
+      if self.lbidlereson==event.widget :
+         strvar=self.idlereson
+      if self.lbprogram==event.widget :
+         strvar=self.program
+         for media in os.listdir("/media/pi") :
+              self.mediaPath="/media/pi/"+media+"/programs/"
+              for file in os.listdir(self.mediaPath) :
+                    popUpList.append(file);
       self.insderframe=Frame(self.frame)
       self.insderframe.columnconfigure(0, weight=1)
-      #self.insderframe.pack(expand=True,fill=X)
+      
       self.insderframe.grid(column=0,row=0,columnspan=10,rowspan=10,sticky=W+E+N+S)
-      AutoComplete.AutocompleteEntry(OperatorList,self.insderframe,strvar).grid(column=0,row=0,sticky=W+E+N+S)
+      AutoComplete.AutocompleteEntry(tuple(popUpList),self.insderframe,strvar).grid(column=0,row=0,sticky=W+E+N+S)
       Button(self.insderframe,text="Cancel",command =self.cancelInput).grid(column=1,row=0,sticky=W+E+N+S)
   def cancelInput(self):
       self.insderframe.destroy()
-    #AutoPopUPView.AutoPopUPView().Show(self.frame,operator)
