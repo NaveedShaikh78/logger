@@ -24,23 +24,21 @@ def startServer(threadName, delay) :
             data = connection.recv(5)
             print >>sys.stderr, 'received "%s"' % data
             if data:
-                sqlx.execute("select * from logdata  where srno>1 LIMIT 10");
-                #query = "insert into logdata(logdatetime,ioport,logvalue,logtype) values ('%s',%d,%s)" % (time.strftime('%m/%d/%Y %X'),-1,data)
-                #print query
-                #sqlx.execute(query)
-                #conn.commit()
-                #print >>sys.stderr, 'sending ack'
-                dataToSend="%d"; 
-                sqldata=sqlx.fetchone()
-                for ch in sqldata: 
-                    dataToSend =dataToSend+str(ch);
+                dataToSend="";
+                for row in  sqlx.execute("select * from logdata  where srno>1 LIMIT 10") :
+                    count=0;
+                    for ch in row: 
+                        count =count+1
+                        if count ==2 :
+                           dataToSend =dataToSend+"'"+str(ch)+"',"
+                        else : 
+                           dataToSend =dataToSend+str(ch)+","
+                    dataToSend=dataToSend.strip(",")
+                    dataToSend=dataToSend+ "\n";
                 connection.sendall(dataToSend);
-            else:
-                print >>sys.stderr, 'no more data from', client_address
-                break
             
       finally:  
          # Clean up the connection
-         print "No more listen"
+         print "No more listening"
          #connection.close()
           
