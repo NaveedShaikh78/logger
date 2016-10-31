@@ -10,6 +10,8 @@ import urllib
 #{portno: port state} configure io ports can add new
 GPI={17:False,27:False,22:False,5:False,6:False,13:False,19:False,26:False}
 sendData = True
+dirtyRecords=True
+
 lastTime = "01/01/2000 00:00:00" 
 
 appview = __import__('AppMainView')
@@ -62,6 +64,22 @@ def watch_GPIO(threadName, delay):
       query="update settings set currenttime='%s'" %(time.strftime('%m/%d/%Y %X'))
       sqlx.execute(query)
       conn.commit()
+      if dirtyRecords == True :
+            # get time by google
+            try:
+                  url="http://trendzsoft.in/logdata.php?st='%s'&et='%s'&ip=%s&jn=1"% (st,et,ip)
+                  print url
+                  filehandle = urllib.urlopen(url)
+                  netTime=  filehandle.read()
+                  netTime
+                  
+                  pitime=netTime
+                  timeDelta=netTime-lastTime;
+                  dirtyRecords=False;
+            except Exception as e:
+                  print e
+            
+      
       app.macstatus.set("%s: %s :Counter" % (threadName, time.ctime(time.time())))
       for ioport in GPI:
          if(GPI[ioport]==False and GPIO.input(ioport) == 0):
@@ -84,6 +102,7 @@ try:
     print "Starting DNC .."
     query = "select currenttime from settings"
     data = sqlx.execute(query)
+    lastTime = data[0]
     
     #thread.start_new_thread(TCPSocket.startServer,("startServer", 2))
     thread.start_new_thread(send_Data,("watch_GPIO", 5))
