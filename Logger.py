@@ -10,6 +10,8 @@ import urllib
 #{portno: port state} configure io ports can add new
 GPI={17:False,27:False,22:False,5:False,6:False,13:False,19:False,26:False}
 sendData = True
+lastTime = "01/01/2000 00:00:00" 
+
 appview = __import__('AppMainView')
 app = appview.AppMainView()       #GPIO.cleanup()
 
@@ -78,7 +80,11 @@ def watch_GPIO(threadName, delay):
              conn.commit()
              sendData = True
 try:
+    global lastTime
     print "Starting DNC .."
+    query = "select currenttime from settings"
+    data = sqlx.execute(query)
+    
     #thread.start_new_thread(TCPSocket.startServer,("startServer", 2))
     thread.start_new_thread(send_Data,("watch_GPIO", 5))
     thread.start_new_thread(watch_GPIO,("send_Data", 1))
