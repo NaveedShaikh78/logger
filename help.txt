@@ -21,27 +21,4 @@ to create table
 BEGIN;
 CREATE TABLE logdata(srno integer primary key autoincrement,logdate DATE, logtime TIME, ioport integer,value integer,logtype integer);
 insert into logdata(logdate DATE, logtime TIME, ioport integer,value integer,logtype integer) values ();
-CREATE TABLE machinelog(srno INTEGER primary key AUTO_INCREMENT, start_time DATETIME, end_time DATETIME,cycletime INTEGER,idletime INTEGER, ioport INTEGER,jobno INTEGER);
-INSERT INTO machinelog( start_time, end_time, cycletime, idletime, ioport, jobno) VALUES ('10/22/2016 00:00:00','10/22/2016 00:20:00',20,20,1,1) 
 COMMIT; 
-
-
-import mysql.connector
-from mysql.connector import Error
- 
- 
-def connect():
-    """ Connect to MySQL database """
-    try:
-        conn = mysql.connector.connect(host='localhost',
-                                       database='python_mysql',
-                                       user='root',
-                                       password='secret')
-        if conn.is_connected():
-            print('Connected to MySQL database')
- 
-    except Error as e:
-        print(e)
- 
-    finally:
-        conn.close()
