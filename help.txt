@@ -22,8 +22,3 @@ BEGIN;
 CREATE TABLE logdata(srno integer primary key autoincrement,logdate DATE, logtime TIME, ioport integer,value integer,logtype integer);
 insert into logdata(logdate DATE, logtime TIME, ioport integer,value integer,logtype integer) values ();
 COMMIT; 
-
-#pi tether
-
-ifconfig
-dhclient usb0
