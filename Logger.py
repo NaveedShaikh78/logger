@@ -26,6 +26,7 @@ appview = __import__('MachineView')
 macView = appview.MachineMainView()       #GPIO.cleanup()
       
 def send_Data(threadName, delay):
+      
       global sendData,dataToSend,queries,dirtyRecords,timeDelta
       
       while True :
@@ -36,9 +37,9 @@ def send_Data(threadName, delay):
 
                   response=client.request('in.pool.ntp.org',version=4)
                   netTime=time.localtime(response.tx_time)
-                  print netTime
+
+                  print "Pi Time %s" % curtime.strftime('%Y-%m-%d %X')
                   
-                  print curtime
                   os.system('date '+time.strftime('%m%d%H%M%Y.%S',netTime))
                   print time.strftime('%Y-%m-%d %X')
                   print "Time Updated"
@@ -115,7 +116,7 @@ def watch_GPIO(threadName, delay):
                   dataToSend.append(row)
             if len(dataToSend) >0 :
                   sendData=True
-      if timeDelta  >10 :
+      if timeDelta  >60 :
             query="update machinelogs set endtime=DATETIME(endtime,'+%d seconds'),starttime=DATETIME(starttime,'+%d seconds'),serstatus=0 where serstatus=1" % (timeDelta,timeDelta)
             print query
             result=sqlx.execute(query)
@@ -130,15 +131,6 @@ def watch_GPIO(threadName, delay):
                   macView.machines[ioport].setCycleCounter(delta)
       except Exception as e:
                print e      
-      currentTime=datetime.now()
-      morningTime=datetime.strptime("%s 08:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")  
-      eveningTime=datetime.strptime("%s 20:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")
-      #print datetime.strptime("%s 20:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")
-      #queryCondition= "starttime between %s and %s " %((morningTime+timedelta(days(1)).strftime('%Y-%m-%d %X'),eveningTime.strftime('%Y-%m-%d %X'))
-      queryCondition="starttime between '%s' and '%s' " %(morningTime.strftime('%Y-%m-%d %X'),eveningTime.strftime('%Y-%m-%d %X'))
-      if morningTime > currentTime and eveningTime < currentTime :
-             morningTime =morningTime + timedelta(days=1)
-             queryCondition="starttime between '%s' and '%s' " %(eveningTime.strftime('%Y-%m-%d %X'),morningTime.strftime('%Y-%m-%d %X'))
       
       for ioport in GPI:
          if(GPI[ioport]==False and GPIO.input(ioport) == 0):
@@ -147,18 +139,24 @@ def watch_GPIO(threadName, delay):
              query ="insert into machinelogs(starttime,ioport ,value,logtype,serstatus) values ('%s',%d,%d,%d,%d)"% (time.strftime('%Y-%m-%d %X'),ioport,1,1,dirtyRecords)
              sqlx.execute(query)
              conn.commit()
-             sendData = True
              macView.machines[ioport].setCycleOn()
-             #IOTimes[ioport]=datetime.now()
+             IOTimes[ioport]=datetime.now()
          if(GPI[ioport]==True and GPIO.input(ioport) !=0):
              GPI[ioport] =False
              print "gpi:%s is off" % ioport
              query="update  machinelogs set endtime= '%s' where  ioport=%d and endtime is null and srno=(select max(srno) from machinelogs where ioport=%d)"% (time.strftime('%Y-%m-%d %X'),ioport,ioport)
              sqlx.execute(query)
              conn.commit()
-             sendData = True
              macView.machines[ioport].setCycleOff()
-             #IOTimes[ioport]=datetime.now()
+             IOTimes[ioport]=datetime.now()
+             currentTime=datetime.now()
+             morningTime=datetime.strptime("%s 08:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")  
+             eveningTime=datetime.strptime("%s 20:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")
+             queryCondition="starttime between '%s' and '%s' " %(morningTime.strftime('%Y-%m-%d %X'),eveningTime.strftime('%Y-%m-%d %X'))
+             if not (morningTime < currentTime and eveningTime > currentTime ) :
+                   morningTime =morningTime + timedelta(days=1)
+                   queryCondition="starttime between '%s' and '%s' " %(eveningTime.strftime('%Y-%m-%d %X'),morningTime.strftime('%Y-%m-%d %X'))
+    
              query="select count(*) from machinelogs  where ioport=%d and %s" %(ioport,queryCondition)
              print query     
              data=sqlx.execute(query)
@@ -170,7 +168,7 @@ def watch_GPIO(threadName, delay):
              
 try:
     global lastTime
-    print "Starting DNC .."
+    print "Starting DNC Logger .."
     query = "select currenttime from settings"
     conn = sqlite3.connect('loggerdb.db')
     sqlx = conn.cursor()
@@ -178,11 +176,14 @@ try:
     for val in data :
        lastTime = datetime.strptime(val[0],"%Y-%m-%d %X")
 
+    os.environ['TZ']='Asia/Kolkata'
+    time.tzset()
+
     currentTime=datetime.now()
     
-    if currentTime<lastTime :
-          os.system('date '+time.strftime('%m%d%H%M%Y.%S',lastTime.timetuple()))
-          print currentTime
+    #if currentTime<lastTime :
+    #      os.system('date '+time.strftime('%m%d%H%M%Y.%S',lastTime.timetuple()))
+    #      print currentTime
           
     morningTime=datetime.strptime("%s 08:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")  
     eveningTime=datetime.strptime("%s 20:00:00"% time.strftime('%Y-%m-%d'),"%Y-%m-%d %X")
@@ -190,9 +191,12 @@ try:
     #queryCondition= "starttime between %s and %s " %((morningTime+timedelta(days(1)).strftime('%Y-%m-%d %X'),eveningTime.strftime('%Y-%m-%d %X'))
     queryCondition="starttime between '%s' and '%s' " %(morningTime.strftime('%Y-%m-%d %X'),eveningTime.strftime('%Y-%m-%d %X'))
     print queryCondition
-    if morningTime > currentTime and eveningTime < currentTime :
+    if  morningTime < currentTime and eveningTime > currentTime :
+          print  queryCondition
+    else  :
           morningTime =morningTime + timedelta(days=1)
           queryCondition="starttime between '%s' and '%s' " %(eveningTime.strftime('%Y-%m-%d %X'),morningTime.strftime('%Y-%m-%d %X'))
+          print   queryCondition
     # update Count
     for ioport in GPI:
            query="select count(*) from machinelogs  where ioport=%d and %s" %(ioport,queryCondition)
@@ -200,25 +204,25 @@ try:
            for row in  data :
                    macView.machines[ioport].setCount(row[0])
     # Update Idle Time
-    for ioport in IOTimes:
+    try: 
+      for ioport in IOTimes:
          query="select  endtime from machinelogs  where  ioport=%d and srno=(select max(srno) from machinelogs where srno= %d) " %(ioport,ioport)
-         print IOTimes[ioport]
-     #      data=sqlx.execute(query)
-      #     for row in  data :
-       #           print row
-        #          lastIOTime = datetime.strptime(row[0],"%Y-%m-%d %X")
-                  #IOTimes[ioport]=lastIOTime
-                  #print lastIOTime
+         data=sqlx.execute(query)
+         for row in  data :
+                  print row
+                  lastIOTime = datetime.strptime(row[0],"%Y-%m-%d %X")
+                  IOTimes[ioport]=lastIOTime
+                  print lastIOTime
     
-    
+    except Exception as e:
+         print e
+ 
     sqlx.close()
     conn.close()
-     
-    os.environ['TZ']='Asia/Kolkata'
-    time.tzset()
-
-   
-    print currentTime
+    
+    print "Pi Time" 
+    print datetime.now()
+    
     #thread.start_new_thread(TCPSocket.startServer,("startServer", 2))
     thread.start_new_thread(send_Data,("watch_GPIO", 5))
     thread.start_new_thread(watch_GPIO,("send_Data", 1))
